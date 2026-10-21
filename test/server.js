@@ -61,7 +61,11 @@ module.exports = function (defaultPorts) {
   function stopServer(server) {
     return new Promise(function (resolve, reject) {
       // Node 19 uses KeepAlive by default
-      if (server.closeIdleConnections) {
+      // Newer Node 24 keeps aborted in-flight requests' sockets non-idle, so close all of them
+      if (server.closeAllConnections) {
+        server.closeAllConnections();
+      }
+      else if (server.closeIdleConnections) {
         server.closeIdleConnections();
       }
       server.close(function (error) {
